@@ -9,8 +9,6 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTCPConnected);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTCPDisconnected);
 
-class FSocket;
-
 UCLASS()
 class UETCPFLATBUFFER_API UTCPClientSubsystem : public UGameInstanceSubsystem
 {
@@ -41,4 +39,6 @@ private:
 	bool SendAll(const uint8* Body, uint32 BodyLength);
 
 	FSocket* ServerSocket = nullptr;
+
+	void DispatchPacket();
 };
