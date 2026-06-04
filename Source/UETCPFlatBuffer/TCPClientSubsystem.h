@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "Tickable.h"
 #include "TCPClientSubsystem.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTCPConnected);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTCPDisconnected);
 
 UCLASS()
-class UETCPFLATBUFFER_API UTCPClientSubsystem : public UGameInstanceSubsystem
+class UETCPFLATBUFFER_API UTCPClientSubsystem : public UGameInstanceSubsystem, public FTickableGameObject
 {
 	GENERATED_BODY()
 
@@ -30,7 +31,6 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "TCPClient")
 	FOnTCPDisconnected OnTCPDisconnected;
 
-
 private:
 	TArray<uint8> RecvBuffer;
 
@@ -41,4 +41,11 @@ private:
 	FSocket* ServerSocket = nullptr;
 
 	void DispatchPacket();
+
+	virtual void Tick(float DeltaTime) override;
+
+	TStatId GetStatId() const override
+	{
+		RETURN_QUICK_DECLARE_CYCLE_STAT(UTCPClientSubsystem, STATGROUP_Tickables);
+	}
 };

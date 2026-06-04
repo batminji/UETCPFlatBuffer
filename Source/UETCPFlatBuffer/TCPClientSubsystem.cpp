@@ -68,17 +68,21 @@ void UTCPClientSubsystem::RecvAll()
 
 	uint32 Pending = 0;
 	uint16 PacketSize = 0;
+	int32 RecvBytes = 0;
 	while (ServerSocket->HasPendingData(Pending))
 	{
-		int32 RecvBytes = 0;
 		if(!ServerSocket->Recv((uint8*)&PacketSize, sizeof(PacketSize), RecvBytes) || RecvBytes == 0)
 		{
 			Disconnect();
 			break;
 		}
+
+		if(RecvBytes == sizeof(PacketSize))
+		{
+			break;
+		}
 	}
 
-	int32 RecvBytes = 0;
 	while (ServerSocket->HasPendingData(Pending))
 	{
 		if (!ServerSocket->Recv(RecvBuffer.GetData(), PacketSize, RecvBytes) || RecvBytes == 0)
@@ -86,10 +90,19 @@ void UTCPClientSubsystem::RecvAll()
 			Disconnect();
 			break;
 		}
-	}
-	RecvBuffer.SetNum(RecvBytes);
 
-	DispatchPacket();
+		if (RecvBytes == PacketSize)
+		{
+			break;
+		}
+	}
+	
+	if (RecvBytes > 0)
+	{
+		RecvBuffer.SetNum(RecvBytes);
+
+		DispatchPacket();
+	}
 }
 
 bool UTCPClientSubsystem::SendAll(const uint8* Body, uint32 BodyLength)
@@ -100,4 +113,10 @@ bool UTCPClientSubsystem::SendAll(const uint8* Body, uint32 BodyLength)
 void UTCPClientSubsystem::DispatchPacket()
 {
 	// flat buffer -> extract
+}
+
+
+void UTCPClientSubsystem::Tick(float DeltaTime)
+{
+	RecvAll();
 }
