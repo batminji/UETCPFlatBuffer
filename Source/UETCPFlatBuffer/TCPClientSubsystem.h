@@ -31,6 +31,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "TCPClient")
 	FOnTCPDisconnected OnTCPDisconnected;
 
+	void SendLogin(const FString& UserID, const FString& Password);
+
 private:
 	TArray<uint8> RecvBuffer;
 

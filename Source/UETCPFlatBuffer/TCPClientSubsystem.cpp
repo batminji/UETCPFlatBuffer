@@ -59,6 +59,22 @@ bool UTCPClientSubsystem::IsConnected() const
 	return ServerSocket != nullptr && ServerSocket->GetConnectionState() == SCS_Connected;
 }
 
+void UTCPClientSubsystem::SendLogin(const FString& UserID, const FString& Password)
+{
+	flatbuffers::FlatBufferBuilder Builder;
+
+	const FTCHARToUTF8 UserUTF8(UserID);
+	const FTCHARToUTF8 PasswordUTF8(Password);
+
+	auto LoginData = UserPacket::CreateC2S_LoginDirect(Builder, UserUTF8.Get(), PasswordUTF8.Get());
+
+	auto PacketData = UserPacket::CreatePacketData(Builder, UserPacket::PacketType_C2S_Login, LoginData.Union());
+
+	Builder.Finish(PacketData);
+
+	SendAll(Builder.GetBufferPointer(), Builder.GetSize());
+}
+
 void UTCPClientSubsystem::RecvAll()
 {
 	if (!ServerSocket)
@@ -102,17 +118,76 @@ void UTCPClientSubsystem::RecvAll()
 		RecvBuffer.SetNum(RecvBytes);
 
 		DispatchPacket();
+
+		RecvBuffer.Reset();
 	}
 }
 
 bool UTCPClientSubsystem::SendAll(const uint8* Body, uint32 BodyLength)
 {
-	return false;
+	TArray<uint8> Packet;
+	Packet.Reserve(2 + BodyLength);
+	// Header
+	FMemory::Memcpy(Packet.GetData(), &BodyLength, 2);
+	// Data
+	Packet.SetNum(2);
+	Packet.Append(Body, BodyLength);
+
+	int32 SendTotalBytes = 0;
+	while(SendTotalBytes < Packet.Num())
+	{
+		int32 SendBytes = 0;
+		if (!ServerSocket->Send(Packet.GetData() + SendTotalBytes, Packet.Num() - SendTotalBytes, SendBytes) || SendBytes == 0)
+		{
+			return false;
+		}
+		SendTotalBytes += SendBytes;
+	}
+
+	return true;
 }
 
 void UTCPClientSubsystem::DispatchPacket()
 {
 	// flat buffer -> extract
+
+	const auto Packet = UserPacket::GetPacketData(RecvBuffer.GetData());
+
+	switch (Packet->data_type())
+	{
+	case UserPacket::PacketType_S2C_Login:
+	{
+		const auto LoginData = Packet->data_as_S2C_Login();
+
+		LoginData->client_socket_id();
+		FString Message = UTF8_TO_TCHAR(LoginData->message()->c_str());
+
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *Message);
+	}
+	break;
+	case UserPacket::PacketType_S2C_Spawn:
+	{
+	}
+	break;
+	case UserPacket::PacketType_S2C_Move:
+	{
+	}
+	break;
+	case UserPacket::PacketType_S2C_Destroy:
+	{
+	}
+	break;
+
+	case UserPacket::PacketType_S2C_ChangeColor:
+	{
+	}
+	break;
+
+	case UserPacket::PacketType_S2C_Signup:
+	{
+	}
+	break;
+	}
 }
 
 
