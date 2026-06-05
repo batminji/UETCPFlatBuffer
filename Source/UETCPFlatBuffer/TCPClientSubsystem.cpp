@@ -9,6 +9,13 @@
 
 #include "UserPacket_generated.h"
 
+void UTCPClientSubsystem::Deinitialize()
+{
+	Disconnect();
+
+	Super::Deinitialize();
+}
+
 bool UTCPClientSubsystem::Connect(const FString& Host, int32 Port)
 {
 	// Socket
@@ -94,7 +101,7 @@ void UTCPClientSubsystem::RecvAll()
 	uint16 PacketSize = 0;
 	int32 TotalRecvBytes = 0;
 	int32 RecvBytes = 0;
-	while (TotalRecvBytes < (int32)(NetPacketSize))
+	while (TotalRecvBytes < (int32)sizeof(NetPacketSize))
 	{
 		if(!ServerSocket->Recv((uint8*)&NetPacketSize + TotalRecvBytes, sizeof(NetPacketSize) - TotalRecvBytes, RecvBytes) || RecvBytes == 0)
 		{

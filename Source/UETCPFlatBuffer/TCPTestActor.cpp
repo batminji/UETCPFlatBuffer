@@ -60,11 +60,18 @@ UTCPClientSubsystem* ATCPTestActor::GetTCPClientSubsystem() const
 
 void ATCPTestActor::HandleConnected()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Connected to server"));
 
+	UTCPClientSubsystem* TCPClientSubsystem = GetTCPClientSubsystem();
+
+	if(TCPClientSubsystem)
+	{
+		TCPClientSubsystem->SendLogin(TEXT("Minji"), TEXT("1234"));
+	}
 }
 
 void ATCPTestActor::HandleDisconnected()
 {
-
+	UE_LOG(LogTemp, Warning, TEXT("Disconnected from server"));
 }
 

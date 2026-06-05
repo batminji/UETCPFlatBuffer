@@ -16,6 +16,8 @@ class UETCPFLATBUFFER_API UTCPClientSubsystem : public UGameInstanceSubsystem, p
 	GENERATED_BODY()
 
 public:
+	virtual void Deinitialize() override;
+
 	UFUNCTION(BlueprintCallable, Category = "TCPClient")
 	bool Connect(const FString& Host, int32 Port);
 	
