@@ -50,14 +50,6 @@ void ULoginWidget::OnRegisterButtonClicked()
     }
 }
 
-void ULoginWidget::OnLoginResult(bool bSuccess)
-{
-}
-
-void ULoginWidget::OnRegisterResult(bool bSuccess)
-{
-}
-
 UTCPClientSubsystem* ULoginWidget::GetTCPClientSubsystem() const
 {
 	UGameInstance* GameInstance = GetGameInstance();

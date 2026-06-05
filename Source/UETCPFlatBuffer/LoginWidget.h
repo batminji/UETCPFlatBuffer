@@ -39,12 +39,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Login")
 	void OnRegisterButtonClicked();
 
-	UFUNCTION()
-	void OnLoginResult(bool bSuccess);
-
-	UFUNCTION()
-	void OnRegisterResult(bool bSuccess);
-
 	UFUNCTION(BlueprintCallable, Category = "TCP")
 	UTCPClientSubsystem* GetTCPClientSubsystem() const;
 };
