@@ -83,6 +83,22 @@ void UTCPClientSubsystem::SendLogin(const FString& UserID, const FString& Passwo
 	SendAll(Builder.GetBufferPointer(), Builder.GetSize());
 }
 
+void UTCPClientSubsystem::SendRegister(const FString& UserID, const FString& Password, const FString& Username)
+{
+	flatbuffers::FlatBufferBuilder Builder;
+
+	const FTCHARToUTF8 UserUTF8(UserID);
+	const FTCHARToUTF8 PasswordUTF8(Password);
+	const FTCHARToUTF8 UsernameUTF8(Username);
+
+	auto RegisterData = UserPacket::CreateC2S_SignupDirect(Builder, UserUTF8.Get(), PasswordUTF8.Get(), UsernameUTF8.Get());
+	auto PacketData = UserPacket::CreatePacketData(Builder, UserPacket::PacketType_C2S_Signup, RegisterData.Union());
+
+	Builder.Finish(PacketData);
+
+	SendAll(Builder.GetBufferPointer(), Builder.GetSize());
+}
+
 void UTCPClientSubsystem::RecvAll()
 {
 	if (!ServerSocket)

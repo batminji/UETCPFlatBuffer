@@ -35,6 +35,8 @@ public:
 
 	void SendLogin(const FString& UserID, const FString& Password);
 
+	void SendRegister(const FString& UserID, const FString& Password, const FString& Username);
+
 private:
 	TArray<uint8> RecvBuffer;
 

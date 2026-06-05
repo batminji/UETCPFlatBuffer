@@ -6,9 +6,45 @@
 #include "Blueprint/UserWidget.h"
 #include "LoginWidget.generated.h"
 
+class UEditableTextBox;
+class UButton;
+class UTCPClientSubsystem;
+
 UCLASS()
 class UETCPFLATBUFFER_API ULoginWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
+public:
+	virtual void NativeConstruct() override;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UEditableTextBox> UsernameTextBox;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UEditableTextBox> PasswordTextBox;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UEditableTextBox> UserIDTextBox;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> LoginButton;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> RegisterButton;
+
+	UFUNCTION(BlueprintCallable, Category = "Login")
+	void OnLoginButtonClicked();
+
+	UFUNCTION(BlueprintCallable, Category = "Login")
+	void OnRegisterButtonClicked();
+
+	UFUNCTION()
+	void OnLoginResult(bool bSuccess);
+
+	UFUNCTION()
+	void OnRegisterResult(bool bSuccess);
+
+	UFUNCTION(BlueprintCallable, Category = "TCP")
+	UTCPClientSubsystem* GetTCPClientSubsystem() const;
 };
