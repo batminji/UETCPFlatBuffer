@@ -32,8 +32,9 @@ bool UTCPClientSubsystem::Connect(const FString& Host, int32 Port)
 		UE_LOG(LogTemp, Warning, TEXT("Failed to connect to server"));
 		return false;
 	}
-	RecvBuffer.Reset();
 
+	ServerSocket->SetNonBlocking(false);
+ 
 	OnTCPConnected.Broadcast();
 
 	return true;
@@ -83,61 +84,60 @@ void UTCPClientSubsystem::RecvAll()
 	}
 
 	uint32 Pending = 0;
-	uint16 PacketSize = 0;
-	int32 RecvBytes = 0;
-	while (ServerSocket->HasPendingData(Pending))
+	if (ServerSocket->HasPendingData(Pending))
 	{
-		if(!ServerSocket->Recv((uint8*)&PacketSize, sizeof(PacketSize), RecvBytes) || RecvBytes == 0)
-		{
-			Disconnect();
-			break;
-		}
-
-		if(RecvBytes == sizeof(PacketSize))
-		{
-			break;
-		}
+		return;
 	}
 
-	while (ServerSocket->HasPendingData(Pending))
+	// Header
+	uint16 NetPacketSize = 0;
+	uint16 PacketSize = 0;
+	int32 TotalRecvBytes = 0;
+	int32 RecvBytes = 0;
+	while (TotalRecvBytes < (int32)(NetPacketSize))
 	{
-		if (!ServerSocket->Recv(RecvBuffer.GetData(), PacketSize, RecvBytes) || RecvBytes == 0)
+		if(!ServerSocket->Recv((uint8*)&NetPacketSize + TotalRecvBytes, sizeof(NetPacketSize) - TotalRecvBytes, RecvBytes) || RecvBytes == 0)
 		{
 			Disconnect();
 			break;
 		}
+		TotalRecvBytes += RecvBytes;
+	}
 
-		if (RecvBytes == PacketSize)
+	PacketSize = NETWORK_ORDER16(NetPacketSize);
+
+	// Body
+	RecvBuffer.SetNumUninitialized(PacketSize);
+	TotalRecvBytes = 0;
+	RecvBytes = 0;
+	while (TotalRecvBytes < (int32)(PacketSize))
+	{
+		if (!ServerSocket->Recv(RecvBuffer.GetData() + TotalRecvBytes, PacketSize - TotalRecvBytes, RecvBytes) || RecvBytes == 0)
 		{
+			Disconnect();
 			break;
 		}
+		TotalRecvBytes += RecvBytes;
 	}
 	
-	if (RecvBytes > 0)
-	{
-		RecvBuffer.SetNum(RecvBytes);
+	DispatchPacket();
 
-		DispatchPacket();
-
-		RecvBuffer.Reset();
-	}
+	RecvBuffer.Reset();
 }
 
 bool UTCPClientSubsystem::SendAll(const uint8* Body, uint32 BodyLength)
 {
 	TArray<uint8> Packet;
 	Packet.Reserve(2 + BodyLength);
-	// Header
-	FMemory::Memcpy(Packet.GetData(), &BodyLength, 2);
-	// Data
-	Packet.SetNum(2);
+	Packet.Add((uint8)(BodyLength >> 8) & 0xFF);
+	Packet.Add((uint8)(BodyLength & 0xFF));
 	Packet.Append(Body, BodyLength);
 
 	int32 SendTotalBytes = 0;
 	while(SendTotalBytes < Packet.Num())
 	{
 		int32 SendBytes = 0;
-		if (!ServerSocket->Send(Packet.GetData() + SendTotalBytes, Packet.Num() - SendTotalBytes, SendBytes) || SendBytes == 0)
+		if (!ServerSocket->Send(Packet.GetData() + SendTotalBytes, Packet.Num() - SendTotalBytes, SendBytes) || SendBytes < 0)
 		{
 			return false;
 		}
