@@ -107,7 +107,7 @@ void UTCPClientSubsystem::RecvAll()
 	}
 
 	uint32 Pending = 0;
-	if (ServerSocket->HasPendingData(Pending))
+	if (!ServerSocket->HasPendingData(Pending))
 	{
 		return;
 	}
