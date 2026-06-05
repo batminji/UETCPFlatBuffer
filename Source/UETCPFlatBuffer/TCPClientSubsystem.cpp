@@ -71,8 +71,8 @@ void UTCPClientSubsystem::SendLogin(const FString& UserID, const FString& Passwo
 {
 	flatbuffers::FlatBufferBuilder Builder;
 
-	const FTCHARToUTF8 UserUTF8(UserID);
-	const FTCHARToUTF8 PasswordUTF8(Password);
+	const FTCHARToUTF8 UserUTF8(*UserID);
+	const FTCHARToUTF8 PasswordUTF8(*Password);
 
 	auto LoginData = UserPacket::CreateC2S_LoginDirect(Builder, UserUTF8.Get(), PasswordUTF8.Get());
 
@@ -87,9 +87,9 @@ void UTCPClientSubsystem::SendRegister(const FString& UserID, const FString& Pas
 {
 	flatbuffers::FlatBufferBuilder Builder;
 
-	const FTCHARToUTF8 UserUTF8(UserID);
-	const FTCHARToUTF8 PasswordUTF8(Password);
-	const FTCHARToUTF8 UsernameUTF8(Username);
+	const FTCHARToUTF8 UserUTF8(*UserID);
+	const FTCHARToUTF8 PasswordUTF8(*Password);
+	const FTCHARToUTF8 UsernameUTF8(*Username);
 
 	auto RegisterData = UserPacket::CreateC2S_SignupDirect(Builder, UserUTF8.Get(), PasswordUTF8.Get(), UsernameUTF8.Get());
 	auto PacketData = UserPacket::CreatePacketData(Builder, UserPacket::PacketType_C2S_Signup, RegisterData.Union());
@@ -127,7 +127,7 @@ void UTCPClientSubsystem::RecvAll()
 		TotalRecvBytes += RecvBytes;
 	}
 
-	PacketSize = NETWORK_ORDER16(NetPacketSize);
+	PacketSize = BYTESWAP_ORDER16(NetPacketSize);
 
 	// Body
 	RecvBuffer.SetNumUninitialized(PacketSize);
