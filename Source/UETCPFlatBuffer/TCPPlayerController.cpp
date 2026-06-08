@@ -14,25 +14,18 @@ void ATCPPlayerController::BeginPlay()
 		ShowLoginWidget();
 	}
 
-	UTCPClientSubsystem* TCPClientSubsystem = GetTCPClientSubsystem();
-	if (TCPClientSubsystem)
-	{
-		TCPClientSubsystem->OnTCPConnected.AddDynamic(this, &ATCPPlayerController::HandleConnected);
-		TCPClientSubsystem->OnTCPDisconnected.AddDynamic(this, &ATCPPlayerController::HandleDisconnected);
-
-		TCPClientSubsystem->Connect(TEXT("127.0.0.1"), 35000);
-	}
-}
-
-UTCPClientSubsystem* ATCPPlayerController::GetTCPClientSubsystem() const
-{
 	UGameInstance* GameInstance = GetGameInstance();
-	if (GameInstance)
+	if(GameInstance)
 	{
-		return GameInstance->GetSubsystem<UTCPClientSubsystem>();
-	}
+		UTCPClientSubsystem* TCPClientSubsystem = GameInstance->GetSubsystem<UTCPClientSubsystem>();
+		if(TCPClientSubsystem)
+		{
+			TCPClientSubsystem->OnTCPConnected.AddDynamic(this, &ATCPPlayerController::HandleConnected);
+			TCPClientSubsystem->OnTCPDisconnected.AddDynamic(this, &ATCPPlayerController::HandleDisconnected);
 
-	return nullptr;
+			TCPClientSubsystem->Connect(TEXT("127.0.0.1"), 35000);
+		}
+	}
 }
 
 void ATCPPlayerController::HandleConnected()

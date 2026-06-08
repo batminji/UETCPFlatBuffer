@@ -20,9 +20,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Widget")
 	TSubclassOf<ULoginWidget> LoginWidgetClass;
 
-	UFUNCTION(BlueprintCallable, Category = "TCP")
-	UTCPClientSubsystem* GetTCPClientSubsystem() const;
-
 	UFUNCTION()
 	void HandleConnected();
 
