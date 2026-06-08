@@ -8,7 +8,6 @@
 
 class UEditableTextBox;
 class UButton;
-class UTCPClientSubsystem;
 
 UCLASS()
 class UETCPFLATBUFFER_API ULoginWidget : public UUserWidget
@@ -39,6 +38,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Login")
 	void OnRegisterButtonClicked();
 
-	UFUNCTION(BlueprintCallable, Category = "TCP")
-	UTCPClientSubsystem* GetTCPClientSubsystem() const;
+	void ProcessLogin(bool bSuccess, const FString& Message);
+
+	void ProcessRegister(bool bSuccess, const FString& Message);
 };

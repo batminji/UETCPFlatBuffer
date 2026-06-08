@@ -32,4 +32,6 @@ public:
 private:
 	UPROPERTY()
 	TObjectPtr<ULoginWidget> LoginWidget;
+
+	void ShowLoginWidget();
 };

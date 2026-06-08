@@ -17,46 +17,59 @@ void ULoginWidget::NativeConstruct()
     if (RegisterButton)
     {
         RegisterButton->OnClicked.AddDynamic(this, &ULoginWidget::OnRegisterButtonClicked);
-    }
-
-    UTCPClientSubsystem* TCPClientSubsystem = GetTCPClientSubsystem();
-    
+    }    
 }
 
 void ULoginWidget::OnLoginButtonClicked()
 {
-    UTCPClientSubsystem* TCPClientSubsystem = GetTCPClientSubsystem();
-
-    if (TCPClientSubsystem)
+	UGameInstance* GameInstance = GetGameInstance();
+    if (GameInstance)
     {
-		FString UserID = UserIDTextBox->GetText().ToString();
-        FString Password = PasswordTextBox->GetText().ToString();
-
-		TCPClientSubsystem->SendLogin(UserID, Password);
+		UTCPClientSubsystem* TCPClientSubsystem = GameInstance->GetSubsystem<UTCPClientSubsystem>();
+        if (TCPClientSubsystem)
+        {
+            TCPClientSubsystem->OnLogin.AddDynamic(this, &ULoginWidget::ProcessLogin);
+			TCPClientSubsystem->SendLogin(UserIDTextBox->GetText().ToString(), PasswordTextBox->GetText().ToString());
+        }
     }
 }
 
 void ULoginWidget::OnRegisterButtonClicked()
 {
-    UTCPClientSubsystem* TCPClientSubsystem = GetTCPClientSubsystem();
-
-    if (TCPClientSubsystem)
+	UGameInstance* GameInstance = GetGameInstance();
+    if (GameInstance)
     {
-        FString UserID = UserIDTextBox->GetText().ToString();
-        FString Password = PasswordTextBox->GetText().ToString();
-		FString Username = UsernameTextBox->GetText().ToString();
-
-		TCPClientSubsystem->SendRegister(UserID, Password, Username);
+        UTCPClientSubsystem* TCPClientSubsystem = GameInstance->GetSubsystem<UTCPClientSubsystem>();
+        if (TCPClientSubsystem)
+        {
+            TCPClientSubsystem->OnRegister.AddDynamic(this, &ULoginWidget::ProcessRegister);
+			TCPClientSubsystem->SendRegister(UserIDTextBox->GetText().ToString(), PasswordTextBox->GetText().ToString(), UsernameTextBox->GetText().ToString());
+        }
     }
 }
 
-UTCPClientSubsystem* ULoginWidget::GetTCPClientSubsystem() const
+void ULoginWidget::ProcessLogin(bool bSuccess, const FString& Message)
 {
 	UGameInstance* GameInstance = GetGameInstance();
-	if (GameInstance)
-	{
-		return GameInstance->GetSubsystem<UTCPClientSubsystem>();
-	}
+    if (GameInstance)
+    {
+        UTCPClientSubsystem* TCPClientSubsystem = GameInstance->GetSubsystem<UTCPClientSubsystem>();
+        if (TCPClientSubsystem)
+        {
+            TCPClientSubsystem->OnLogin.RemoveDynamic(this, &ULoginWidget::ProcessLogin);
+		}
+    }
+}
 
-	return nullptr;
+void ULoginWidget::ProcessRegister(bool bSuccess, const FString& Message)
+{
+	UGameInstance* GameInstance = GetGameInstance();
+    if (GameInstance)
+    {
+        UTCPClientSubsystem* TCPClientSubsystem = GameInstance->GetSubsystem<UTCPClientSubsystem>();
+        if (TCPClientSubsystem)
+        {
+            TCPClientSubsystem->OnRegister.RemoveDynamic(this, &ULoginWidget::ProcessRegister);
+		}
+    }
 }

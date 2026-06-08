@@ -9,6 +9,11 @@ void ATCPPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (IsLocalPlayerController())
+	{
+		ShowLoginWidget();
+	}
+
 	UTCPClientSubsystem* TCPClientSubsystem = GetTCPClientSubsystem();
 	if (TCPClientSubsystem)
 	{
@@ -33,21 +38,25 @@ UTCPClientSubsystem* ATCPPlayerController::GetTCPClientSubsystem() const
 void ATCPPlayerController::HandleConnected()
 {
     UE_LOG(LogTemp, Warning, TEXT("Connected!"));
-
-    if (LoginWidgetClass)
-    {
-        LoginWidget = CreateWidget<ULoginWidget>(this, LoginWidgetClass);
-        if (LoginWidget)
-        {
-            LoginWidget->AddToViewport();
-            bShowMouseCursor = true;
-			SetInputMode(FInputModeUIOnly());
-        }
-    }
 }
 
 void ATCPPlayerController::HandleDisconnected()
 {
     UE_LOG(LogTemp, Warning, TEXT("Disconnected!"));
+}
+
+void ATCPPlayerController::ShowLoginWidget()
+{
+	if (LoginWidgetClass)
+	{
+		LoginWidget = CreateWidget<ULoginWidget>(this, LoginWidgetClass);
+		if (LoginWidget)
+		{
+			LoginWidget->AddToViewport();
+		}
+	}
+
+	bShowMouseCursor = true;
+	SetInputMode(FInputModeUIOnly());
 }
 

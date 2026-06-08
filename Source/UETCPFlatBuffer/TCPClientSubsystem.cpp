@@ -185,7 +185,9 @@ void UTCPClientSubsystem::DispatchPacket()
 		LoginData->client_socket_id();
 		FString Message = UTF8_TO_TCHAR(LoginData->message()->c_str());
 
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *Message);
+		// UE_LOG(LogTemp, Warning, TEXT("%s"), *Message);
+
+		OnLogin.Broadcast(LoginData->success(), Message);
 	}
 	break;
 	case UserPacket::PacketType_S2C_Spawn:
@@ -208,6 +210,13 @@ void UTCPClientSubsystem::DispatchPacket()
 
 	case UserPacket::PacketType_S2C_Signup:
 	{
+		const auto RegisterData = Packet->data_as_S2C_Signup();
+
+		FString Message = UTF8_TO_TCHAR(RegisterData->message()->c_str());
+
+		// UE_LOG(LogTemp, Warning, TEXT("%s"), *Message);
+
+		OnRegister.Broadcast(RegisterData->success(), Message);
 	}
 	break;
 	}

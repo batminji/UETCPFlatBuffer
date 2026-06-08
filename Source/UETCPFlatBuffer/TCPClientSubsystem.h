@@ -9,6 +9,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTCPConnected);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTCPDisconnected);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnLoginCallback, bool, bSuccess, const FString&, Message);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRegisterCallback, bool, bSuccess, const FString&, Message);
 
 UCLASS()
 class UETCPFLATBUFFER_API UTCPClientSubsystem : public UGameInstanceSubsystem, public FTickableGameObject
@@ -32,6 +34,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "TCPClient")
 	FOnTCPDisconnected OnTCPDisconnected;
+
+	UPROPERTY(BlueprintAssignable, Category = "TCPClient")
+	FOnLoginCallback OnLogin;
+
+	UPROPERTY(BlueprintAssignable, Category = "TCPClient")
+	FOnRegisterCallback OnRegister;
 
 	void SendLogin(const FString& UserID, const FString& Password);
 
