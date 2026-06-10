@@ -2,25 +2,27 @@
 
 
 #include "TCPRecvWorker.h"
+#include "Sockets.h"
 #include "SocketSubsystem.h"
 
-FTCPRecvWorker::FTCPRecvWorker()
+FTCPRecvWorker::FTCPRecvWorker(FSocket* InServerSocker, TQueue<TArray<uint8>>& InRecvQueue)
+	: ServerSocket(InServerSocker), RecvQueue(InRecvQueue)
 {
 }
 
 uint32 FTCPRecvWorker::Run()
 {
-	while (true)
+	while (!bStopRequested)
 	{
 		if (!ServerSocket)
 		{
-			return;
+			return 0;
 		}
 
 		uint32 Pending = 0;
 		if (!ServerSocket->HasPendingData(Pending))
 		{
-			return;
+			return 0;
 		}
 
 		// Header
@@ -32,7 +34,7 @@ uint32 FTCPRecvWorker::Run()
 		{
 			if (!ServerSocket->Recv((uint8*)&NetPacketSize + TotalRecvBytes, sizeof(NetPacketSize) - TotalRecvBytes, RecvBytes) || RecvBytes == 0)
 			{
-				Disconnect();
+				// Disconnect();
 				break;
 			}
 			TotalRecvBytes += RecvBytes;
@@ -48,15 +50,17 @@ uint32 FTCPRecvWorker::Run()
 		{
 			if (!ServerSocket->Recv(RecvBuffer.GetData() + TotalRecvBytes, PacketSize - TotalRecvBytes, RecvBytes) || RecvBytes == 0)
 			{
-				Disconnect();
+				// Disconnect();
 				break;
 			}
 			TotalRecvBytes += RecvBytes;
 		}
 
-		DispatchPacket();
+		// DispatchPacket();
 
-		RecvBuffer.Reset();
+		// RecvBuffer.Reset();
+
+		RecvQueue.Enqueue(MoveTemp(RecvBuffer));
 
 	}
 	return uint32();
@@ -64,4 +68,5 @@ uint32 FTCPRecvWorker::Run()
 
 void FTCPRecvWorker::Stop()
 {
+	bStopRequested = true;
 }

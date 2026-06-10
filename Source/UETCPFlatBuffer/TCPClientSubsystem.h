@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Tickable.h"
+#include "Containers/Queue.h"
 #include "TCPClientSubsystem.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTCPConnected);
@@ -53,6 +54,8 @@ private:
 	// Worker Thread
 	FTCPRecvWorker* RecvWorker = nullptr;
 	FRunnableThread* RecvThread = nullptr;
+
+	TQueue<TArray<uint8>> PacketQueue;
 
 	TArray<uint8> RecvBuffer;
 
