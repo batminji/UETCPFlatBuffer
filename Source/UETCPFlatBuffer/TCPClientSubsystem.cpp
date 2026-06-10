@@ -101,51 +101,7 @@ void UTCPClientSubsystem::SendRegister(const FString& UserID, const FString& Pas
 
 void UTCPClientSubsystem::RecvAll()
 {
-	if (!ServerSocket)
-	{
-		return;
-	}
-
-	uint32 Pending = 0;
-	if (!ServerSocket->HasPendingData(Pending))
-	{
-		return;
-	}
-
-	// Header
-	uint16 NetPacketSize = 0;
-	uint16 PacketSize = 0;
-	int32 TotalRecvBytes = 0;
-	int32 RecvBytes = 0;
-	while (TotalRecvBytes < (int32)sizeof(NetPacketSize))
-	{
-		if(!ServerSocket->Recv((uint8*)&NetPacketSize + TotalRecvBytes, sizeof(NetPacketSize) - TotalRecvBytes, RecvBytes) || RecvBytes == 0)
-		{
-			Disconnect();
-			break;
-		}
-		TotalRecvBytes += RecvBytes;
-	}
-
-	PacketSize = BYTESWAP_ORDER16(NetPacketSize);
-
-	// Body
-	RecvBuffer.SetNumUninitialized(PacketSize);
-	TotalRecvBytes = 0;
-	RecvBytes = 0;
-	while (TotalRecvBytes < (int32)(PacketSize))
-	{
-		if (!ServerSocket->Recv(RecvBuffer.GetData() + TotalRecvBytes, PacketSize - TotalRecvBytes, RecvBytes) || RecvBytes == 0)
-		{
-			Disconnect();
-			break;
-		}
-		TotalRecvBytes += RecvBytes;
-	}
 	
-	DispatchPacket();
-
-	RecvBuffer.Reset();
 }
 
 bool UTCPClientSubsystem::SendAll(const uint8* Body, uint32 BodyLength)
@@ -225,5 +181,7 @@ void UTCPClientSubsystem::DispatchPacket()
 
 void UTCPClientSubsystem::Tick(float DeltaTime)
 {
-	RecvAll();
+	// RecvAll();
+	// 메시지 구독 / 큐 확인
+
 }

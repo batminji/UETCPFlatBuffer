@@ -12,6 +12,10 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTCPDisconnected);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnLoginCallback, bool, bSuccess, const FString&, Message);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRegisterCallback, bool, bSuccess, const FString&, Message);
 
+class FSocket;
+class FTCPRecvWorker;
+class FRunnableThread;
+
 UCLASS()
 class UETCPFLATBUFFER_API UTCPClientSubsystem : public UGameInstanceSubsystem, public FTickableGameObject
 {
@@ -46,6 +50,10 @@ public:
 	void SendRegister(const FString& UserID, const FString& Password, const FString& Username);
 
 private:
+	// Worker Thread
+	FTCPRecvWorker* RecvWorker = nullptr;
+	FRunnableThread* RecvThread = nullptr;
+
 	TArray<uint8> RecvBuffer;
 
 	void RecvAll();
