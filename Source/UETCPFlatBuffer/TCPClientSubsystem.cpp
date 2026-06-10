@@ -57,14 +57,6 @@ void UTCPClientSubsystem::Disconnect()
 {
 	ISocketSubsystem* SocketSubsystem = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
 
-	// Close Socket
-	if(ServerSocket)
-	{
-		ServerSocket->Close();
-		SocketSubsystem->DestroySocket(ServerSocket);
-		ServerSocket = nullptr;
-	}
-
 	if (RecvThread)
 	{
 		RecvThread->Kill(true);
@@ -82,6 +74,14 @@ void UTCPClientSubsystem::Disconnect()
 	RecvQueue.Empty();
 
 	OnTCPDisconnected.Broadcast();
+
+	// Close Socket
+	if (ServerSocket)
+	{
+		ServerSocket->Close();
+		SocketSubsystem->DestroySocket(ServerSocket);
+		ServerSocket = nullptr;
+	}
 }
 
 bool UTCPClientSubsystem::IsConnected() const
