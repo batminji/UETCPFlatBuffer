@@ -55,7 +55,7 @@ private:
 	FTCPRecvWorker* RecvWorker = nullptr;
 	FRunnableThread* RecvThread = nullptr;
 
-	TQueue<TArray<uint8>> PacketQueue;
+	TQueue<TArray<uint8>> RecvQueue;
 
 	TArray<uint8> RecvBuffer;
 
